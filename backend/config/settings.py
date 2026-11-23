@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'accounts',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -70,6 +72,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+}
 
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
@@ -104,6 +114,16 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+AUTH_USER_MODEL = "accounts.User"
+
+MAILERS = {
+    "default": {
+        "BACKEND": "django.core.mail.backends.console.EmailBackend",
+    },
+}
+
+DEFAULT_FROM_EMAIL = "noreply@locos.com"
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.1/topics/i18n/
