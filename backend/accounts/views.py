@@ -7,9 +7,11 @@ from django.urls import reverse
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
-
+from .serializers import UserProfileSerializer
 from .tokens import (verify_verification_token, generate_verification_token)
 from .models import User
 
@@ -41,6 +43,7 @@ class RegisterView(generics.CreateAPIView):
             f"{verification_url}\n\n"
             "This link expires in 24 hours."
         )
+        print("\nACTUAL VERIFICATION URL:", verification_url)
 
         send_mail(
             subject="Verify your Locos account",
@@ -128,3 +131,11 @@ class ResendVerificationView(APIView):
         return Response({
             "message": "If an unverified account exists, a verification email has been sent."
         })
+        
+
+class CurrentUserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = UserProfileSerializer(request.user)
+        return Response(serializer.data)
