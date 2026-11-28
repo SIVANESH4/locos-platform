@@ -1,13 +1,19 @@
-import Logo from "../components/ui/Logo";
 
-function AuthHeader({ label = "ACCOUNT" }) {
+import Logo from "../components/ui/Logo";
+import { Link } from "react-router-dom";
+
+function AuthHeader() {
   return (
-    <header className="mb-10 flex items-center justify-between lg:hidden">
+    <header className="mb-10 flex items-center justify-between">
       <Logo className="text-2xl" />
 
-      <span className="text-xs font-semibold tracking-[0.15em] text-muted">
-        {label}
-      </span>
+      <Link
+        to="/"
+        className="inline-flex min-h-10 items-center gap-2 text-[13px] font-medium text-muted transition-colors hover:text-charcoal focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-charcoal"
+      >
+        <span aria-hidden="true">&lt;-</span>
+        Back to home
+      </Link>
     </header>
   );
 }

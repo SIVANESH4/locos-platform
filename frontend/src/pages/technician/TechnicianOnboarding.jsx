@@ -18,25 +18,36 @@ function TechnicianOnboarding() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [categories, setCategories] = useState([]);
 
   // Calculate profile completion
   const completedFields = useMemo(() => {
-  return [
-    Boolean(formData.bio.trim()),
-    formData.experience_years !== "" &&
+    return [
+      Boolean(formData.bio.trim()),
+      formData.experience_years !== "" &&
       Number(formData.experience_years) > 0,
-    Boolean(formData.location.trim()),
-    Boolean(formData.phone_number.trim()),
-    Boolean(photoPreview),
-  ].filter(Boolean).length;
-}, [formData, photoPreview]);
+      Boolean(formData.location.trim()),
+      Boolean(formData.phone_number.trim()),
+      Boolean(formData.category),
+      Boolean(photoPreview),
+    ].filter(Boolean).length;
+  }, [formData, photoPreview]);
 
-const completion = Math.round((completedFields / 5) * 100);
+  const completion = Math.round((completedFields / 6) * 100);
 
   // Fetch existing profile
   useEffect(() => {
     let active = true;
+    const fetchCategories = async () => {
+      try {
+        const response = await api.get("/categories/");
+        setCategories(response.data);
+      } catch (error) {
+        console.error("Failed to load service categories:", error);
+      }
+    };
 
+    fetchCategories();
     const fetchProfile = async () => {
       try {
         const response = await api.get("/technicians/profile/");
@@ -50,6 +61,7 @@ const completion = Math.round((completedFields / 5) * 100);
           location: data.location ?? "",
           phone_number: data.phone_number ?? "",
           is_available: data.is_available ?? true,
+          category: data.category ?? "",
           profile_photo: null,
         });
 
@@ -136,7 +148,10 @@ const completion = Math.round((completedFields / 5) * 100);
       setError("Please enter your working location.");
       return;
     }
-
+    if (!formData.category) {
+      setError("Please select your service category.");
+      return;
+    }
     if (!formData.phone_number.trim()) {
       setError("Please enter your contact number.");
       return;
@@ -148,7 +163,7 @@ const completion = Math.round((completedFields / 5) * 100);
       const payload = new FormData();
 
       Object.entries(formData).forEach(([key, value]) => {
-        if (value !== null && value !== undefined) {
+        if (value !== null && value !== undefined && value !== "") {
           payload.append(key, value);
         }
       });
@@ -192,81 +207,81 @@ const completion = Math.round((completedFields / 5) * 100);
   }
 
   return (
-<div className="min-h-screen bg-[#F7F8F4] lg:grid lg:grid-cols-[340px_1fr]">
-          {/* LEFT BRAND PANEL */}
-<aside className="relative flex min-h-screen flex-col justify-between bg-charcoal px-7 py-7 text-white md:px-10 lg:sticky lg:top-0 lg:h-screen lg:min-h-0 lg:px-10 lg:py-8">        <div>
-          <a href="/" className="inline-flex items-center gap-2">
-            <span className="display-font text-4xl font-bold tracking-tight">
-              LOCOS
+    <div className="min-h-screen bg-[#F7F8F4] lg:grid lg:grid-cols-[340px_1fr]">
+      {/* LEFT BRAND PANEL */}
+      <aside className="relative flex min-h-screen flex-col justify-between bg-charcoal px-7 py-7 text-white md:px-10 lg:sticky lg:top-0 lg:h-screen lg:min-h-0 lg:px-10 lg:py-8">        <div>
+        <a href="/" className="inline-flex items-center gap-2">
+          <span className="display-font text-4xl font-bold tracking-tight">
+            LOCOS
+          </span>
+          <span className="h-3 w-3 rounded-full bg-brand" />
+        </a>
+
+        <div className="mt-10 max-w-sm lg:mt-14">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-brand">
+            Technician registration
+          </p>
+
+          <h1 className="display-font mt-5 text-5xl font-bold leading-[0.95]">
+            Your skills.
+            <br />
+            Your reputation.
+            <br />
+            Your business.
+          </h1>
+
+          <p className="mt-6 text-sm leading-7 text-white/60">
+            Create your professional identity on Locos.
+            Help customers discover your expertise and
+            connect with you for their service needs.
+          </p>
+        </div>
+      </div>
+
+
+        {/* PROFILE COMPLETION */}
+        <div className="mt-8 shrink-0 border-t border-white/15 pt-5">
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/60">
+                Your progress
+              </p>
+              <p className="mt-1 text-sm font-medium text-white">
+                Profile completion
+              </p>
+            </div>
+
+            <span className="display-font text-4xl font-bold text-brand">
+              {completion}%
             </span>
-            <span className="h-3 w-3 rounded-full bg-brand" />
-          </a>
+          </div>
 
-<div className="mt-10 max-w-sm lg:mt-14">
-                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-brand">
-              Technician registration
+          <div className="mt-5 h-3 overflow-hidden rounded-full bg-white/15 p-[2px]">
+            <div
+              className="h-full rounded-full bg-brand transition-all duration-700 ease-out"
+              style={{ width: `${completion}%` }}
+            />
+          </div>
+
+          <div className="mt-3 flex items-center justify-between">
+            <p className="text-xs text-white/50">
+              {completedFields} of 5 completed
             </p>
-
-            <h1 className="display-font mt-5 text-5xl font-bold leading-[0.95]">
-              Your skills.
-              <br />
-              Your reputation.
-              <br />
-              Your business.
-            </h1>
-
-            <p className="mt-6 text-sm leading-7 text-white/60">
-              Create your professional identity on Locos.
-              Help customers discover your expertise and
-              connect with you for their service needs.
+            <p className="text-xs font-semibold text-brand">
+              {completion === 100 ? "All done!" : "Keep going"}
             </p>
           </div>
+
+          <p className="mt-8 text-xs leading-6 text-white/35">
+            LOCOS — Connecting local talent with local needs.
+          </p>
         </div>
-
-        
-{/* PROFILE COMPLETION */}
-<div className="mt-8 shrink-0 border-t border-white/15 pt-5">
-  <div className="flex items-end justify-between">
-    <div>
-      <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/60">
-        Your progress
-      </p>
-      <p className="mt-1 text-sm font-medium text-white">
-        Profile completion
-      </p>
-    </div>
-
-    <span className="display-font text-4xl font-bold text-brand">
-      {completion}%
-    </span>
-  </div>
-
-  <div className="mt-5 h-3 overflow-hidden rounded-full bg-white/15 p-[2px]">
-    <div
-      className="h-full rounded-full bg-brand transition-all duration-700 ease-out"
-      style={{ width: `${completion}%` }}
-    />
-  </div>
-
-  <div className="mt-3 flex items-center justify-between">
-    <p className="text-xs text-white/50">
-      {completedFields} of 5 completed
-    </p>
-    <p className="text-xs font-semibold text-brand">
-      {completion === 100 ? "All done!" : "Keep going"}
-    </p>
-  </div>
-
-  <p className="mt-8 text-xs leading-6 text-white/35">
-    LOCOS — Connecting local talent with local needs.
-  </p>
-</div>
 
       </aside>
 
       {/* RIGHT CONTENT */}
-<main className="min-w-0 bg-[#F1F3EC] px-5 py-8 md:px-10 md:py-10 lg:px-12 lg:py-12">
-<div className="mx-auto max-w-3xl">
+      <main className="min-w-0 bg-[#F1F3EC] px-5 py-8 md:px-10 md:py-10 lg:px-12 lg:py-12">
+        <div className="mx-auto max-w-3xl">
           {/* Heading */}
           <div className="mb-10">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted">
@@ -368,7 +383,31 @@ const completion = Math.round((completedFields / 5) * 100);
                     {formData.bio.length}/1000
                   </p>
                 </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-charcoal">
+                    Service Category
+                  </label>
 
+                  <select
+                    name="category"
+                    value={formData.category || ""}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        category: e.target.value,
+                      })
+                    }
+                    className="w-full rounded-lg border border-border bg-input px-4 py-3 text-sm outline-none focus:border-charcoal"
+                  >
+                    <option value="">Select your service category</option>
+
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
                 <div>
                   <label
                     htmlFor="experience_years"
@@ -476,16 +515,14 @@ const completion = Math.round((completedFields / 5) * 100);
                     is_available: !prev.is_available,
                   }))
                 }
-                className={`relative h-7 w-12 shrink-0 rounded-full transition ${
-                  formData.is_available
-                    ? "bg-charcoal"
-                    : "bg-gray-300"
-                }`}
+                className={`relative h-7 w-12 shrink-0 rounded-full transition ${formData.is_available
+                  ? "bg-charcoal"
+                  : "bg-gray-300"
+                  }`}
               >
                 <span
-                  className={`absolute top-1 h-5 w-5 rounded-full bg-white transition-all ${
-                    formData.is_available ? "left-6" : "left-1"
-                  }`}
+                  className={`absolute top-1 h-5 w-5 rounded-full bg-white transition-all ${formData.is_available ? "left-6" : "left-1"
+                    }`}
                 />
               </button>
             </section>

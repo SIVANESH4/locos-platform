@@ -7,7 +7,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import CheckEmail from "./pages/CheckEmail";
 import VerifyEmail from "./pages/VerifyEmail";
 import TechnicianOnboarding from "./pages/technician/TechnicianOnboarding";
-// import Home from "./pages/Home";
+import Home from "./pages/Home";
 // import CustomerDashboard from "./pages/CustomerDashboard";
 // import TechnicianDashboard from "./pages/TechnicianDashboard";
 
@@ -15,6 +15,7 @@ function App() {
   return (
     <Routes>
       {/* Public routes */}
+      <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/check-email" element={<CheckEmail />} />
